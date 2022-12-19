@@ -1,4 +1,4 @@
-package level
+package engine
 
 import "github.com/gdamore/tcell"
 

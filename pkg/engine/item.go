@@ -1,6 +1,6 @@
-package item
+package engine
 
-type IItem interface {
+type Item interface {
 	GetName() string
 	GetDescription() []string
 }

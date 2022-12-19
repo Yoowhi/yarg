@@ -1,8 +1,8 @@
-package actor
+package engine
 
 import "github.com/yoowhi/yarg/pkg/h"
 
-type IActor interface {
+type Actor interface {
 	GetHealth() int
 	SetHealth(value int)
 

@@ -48,10 +48,8 @@ import (
 	"os"
 
 	"github.com/gdamore/tcell"
-	"github.com/yoowhi/yarg/pkg/actor"
+	"github.com/yoowhi/yarg/pkg/engine"
 	"github.com/yoowhi/yarg/pkg/h"
-	"github.com/yoowhi/yarg/pkg/level"
-	"github.com/yoowhi/yarg/pkg/render"
 )
 
 func main() {
@@ -59,9 +57,9 @@ func main() {
 	screen := initScreen()
 	width, height := screen.Size()
 
-	lvl := level.GenLevel(h.Vector{X: width, Y: height})
+	lvl := engine.GenLevel(h.Vector{X: width, Y: height})
 
-	ch := actor.MeleeCharacter{
+	ch := MeleeCharacter{
 		Health:    10,
 		Position:  h.Vector{X: 15, Y: 15},
 		MaxHealth: 10,
@@ -70,7 +68,7 @@ func main() {
 	lvl.Actors.Add(&ch)
 
 	for {
-		render.Draw(screen, lvl.Visuals)
+		engine.Draw(screen, lvl.Visuals)
 		ev := screen.PollEvent()
 		//temp switch
 		switch ev := ev.(type) {
@@ -83,7 +81,7 @@ func main() {
 			}
 			if ev.Key() == tcell.KeyEnter {
 				width, height = screen.Size()
-				lvl = level.GenLevel(h.Vector{X: width, Y: height})
+				lvl = engine.GenLevel(h.Vector{X: width, Y: height})
 			}
 		}
 	}

@@ -1,4 +1,6 @@
-package h
+package engine
+
+import "github.com/yoowhi/yarg/pkg/h"
 
 type Pool[T GameObject] struct {
 	list []T
@@ -20,7 +22,7 @@ func (p *Pool[T]) Remove(actor *T) bool {
 	return false
 }
 
-func (p *Pool[T]) Find(position Vector) *T {
+func (p *Pool[T]) Find(position h.Vector) *T {
 	for _, v := range p.list {
 		if v.GetPosition().Equals(position) {
 			return &v

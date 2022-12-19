@@ -1,7 +1,7 @@
-package actor
+package main
 
 import (
-	"github.com/yoowhi/yarg/pkg/component"
+	"github.com/yoowhi/yarg/pkg/engine/component"
 	"github.com/yoowhi/yarg/pkg/h"
 )
 
