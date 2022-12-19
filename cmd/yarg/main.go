@@ -48,6 +48,7 @@ import (
 	"os"
 
 	"github.com/gdamore/tcell"
+	"github.com/yoowhi/yarg/pkg/actor"
 	"github.com/yoowhi/yarg/pkg/h"
 	"github.com/yoowhi/yarg/pkg/level"
 	"github.com/yoowhi/yarg/pkg/render"
@@ -59,6 +60,14 @@ func main() {
 	width, height := screen.Size()
 
 	lvl := level.GenLevel(h.Vector{X: width, Y: height})
+
+	ch := actor.MeleeCharacter{
+		Health:    10,
+		Position:  h.Vector{X: 15, Y: 15},
+		MaxHealth: 10,
+	}
+
+	lvl.Actors.Add(&ch)
 
 	for {
 		render.Draw(screen, lvl.Visuals)

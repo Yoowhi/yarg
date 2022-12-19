@@ -1,11 +1,16 @@
 package actor
 
-import "github.com/yoowhi/yarg/pkg/h"
+import (
+	"github.com/yoowhi/yarg/pkg/component"
+	"github.com/yoowhi/yarg/pkg/h"
+)
 
 type MeleeCharacter struct {
-	Health   int
-	Breed    Breed
-	Position h.Vector
+	Health    int
+	MaxHealth int
+	Position  h.Vector
+
+	Inventory component.Inventory
 }
 
 func (c *MeleeCharacter) GetHealth() int {
@@ -16,12 +21,12 @@ func (c *MeleeCharacter) SetHealth(value int) {
 	c.Health = value
 }
 
-func (c *MeleeCharacter) GetBreed() Breed {
-	return c.Breed
+func (c *MeleeCharacter) GetMaxHealth() int {
+	return c.MaxHealth
 }
 
-func (c *MeleeCharacter) SetBreed(value Breed) {
-	c.Breed = value
+func (c *MeleeCharacter) SetMaxHealth(value int) {
+	c.MaxHealth = value
 }
 
 func (c *MeleeCharacter) GetPosition() h.Vector {

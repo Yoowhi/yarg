@@ -10,3 +10,7 @@ type Level struct {
 	Visuals    [][]Cell
 	Actors     h.Pool[actor.IActor]
 }
+
+func (lvl *Level) isCollision(coord h.Vector) bool {
+	return lvl.Collisions[coord.X][coord.Y]
+}
