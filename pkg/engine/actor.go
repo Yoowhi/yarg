@@ -12,5 +12,7 @@ type Actor interface {
 	GetPosition() h.Vector
 	SetPosition(value h.Vector)
 
+	GetCell() Cell
+
 	TakeTurn()
 }

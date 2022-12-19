@@ -52,40 +52,73 @@ import (
 	"github.com/yoowhi/yarg/pkg/h"
 )
 
+var hero Hero
+var currentLvl engine.Level
+
 func main() {
 
 	screen := initScreen()
 	width, height := screen.Size()
 
-	lvl := engine.GenLevel(h.Vector{X: width, Y: height})
+	currentLvl = engine.GenLevel(h.Vector{X: width, Y: height})
 
-	ch := MeleeCharacter{
+	style := tcell.StyleDefault.Background((tcell.ColorBlack)).Foreground(tcell.ColorPurple)
+	hero = Hero{
 		Health:    10,
 		Position:  h.Vector{X: 15, Y: 15},
 		MaxHealth: 10,
+		Cell:      engine.Cell{Symbol: '@', Style: style},
 	}
 
-	lvl.Actors.Add(&ch)
+	currentLvl.Actors.Add(&hero)
 
 	for {
-		engine.Draw(screen, lvl.Visuals)
+		engine.Draw(screen, &currentLvl)
 		ev := screen.PollEvent()
 		//temp switch
 		switch ev := ev.(type) {
 		case *tcell.EventResize:
 			screen.Sync()
 		case *tcell.EventKey:
+			playerControl(ev)
 			if ev.Key() == tcell.KeyEsc {
 				screen.Fini()
 				os.Exit(0)
 			}
 			if ev.Key() == tcell.KeyEnter {
 				width, height = screen.Size()
-				lvl = engine.GenLevel(h.Vector{X: width, Y: height})
+				currentLvl = engine.GenLevel(h.Vector{X: width, Y: height})
+				style := tcell.StyleDefault.Background((tcell.ColorBlack)).Foreground(tcell.ColorPurple)
+				hero = Hero{
+					Health:    10,
+					Position:  h.Vector{X: 15, Y: 15},
+					MaxHealth: 10,
+					Cell:      engine.Cell{Symbol: '@', Style: style},
+				}
+				currentLvl.Actors.Add(&hero)
 			}
 		}
 	}
 
+}
+
+// temp func
+func playerControl(event *tcell.EventKey) {
+	var move h.Vector
+	switch event.Key() {
+	case tcell.KeyUp:
+		move = h.Vector{X: 0, Y: -1}
+	case tcell.KeyDown:
+		move = h.Vector{X: 0, Y: 1}
+	case tcell.KeyLeft:
+		move = h.Vector{X: -1, Y: 0}
+	case tcell.KeyRight:
+		move = h.Vector{X: 1, Y: 0}
+	}
+	pos := hero.GetPosition().Add(move)
+	if !currentLvl.IsCollision(pos) {
+		hero.SetPosition(pos)
+	}
 }
 
 func initScreen() tcell.Screen {
