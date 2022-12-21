@@ -11,7 +11,7 @@ func Draw(screen tcell.Screen, lvl *Level) {
 			screen.SetContent(x, y, lvl.Visuals[x][y].Symbol, nil, lvl.Visuals[x][y].Style)
 		}
 	}
-	for _, actor := range lvl.Actors.list {
+	for _, actor := range lvl.Actors.List {
 		pos := actor.GetPosition()
 		cell := actor.GetCell()
 		screen.SetContent(pos.X, pos.Y, cell.Symbol, nil, cell.Style)
