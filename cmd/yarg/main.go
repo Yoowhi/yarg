@@ -14,7 +14,7 @@ import (
 )
 
 var hero Hero
-var currentLvl engine.Level
+var currentLvl *engine.Level
 var screen tcell.Screen
 
 func main() {
@@ -35,7 +35,7 @@ func main() {
 	currentLvl.Actors.Add(&hero)
 
 	for {
-		engine.Draw(screen, &currentLvl)
+		engine.Draw(screen, currentLvl)
 		WaitInput()
 		for _, actor := range currentLvl.Actors.List {
 			actor.TakeTurn()
