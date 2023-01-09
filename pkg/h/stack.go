@@ -22,8 +22,7 @@ func (s *Stack[T]) Pop() (*T, error) {
 	return &el, nil
 }
 
-func NewStack[T any](cap int) Stack[T] {
-	list := make([]T, cap)
+func ConvertToStack[T any](list []T) Stack[T] {
 	return Stack[T]{list: list}
 }
 

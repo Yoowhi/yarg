@@ -4,16 +4,16 @@ import (
 	"github.com/yoowhi/yarg/pkg/h"
 )
 
-func FindRooms(collisions [][]bool) ([]Room, [][]int) {
+func GetAreas(collisions [][]bool) ([]Area, [][]int) {
 	size := Size(collisions)
-	roomsMap := GenEmpty(size, -1)
+	areasMap := GenEmpty(size, -1)
 	checked := GenEmpty(size, false)
-	rooms := []Room{}
-	roomsCounter := 0
+	areas := []Area{}
+	areaCounter := 0
 
 	f := func(coord h.Vector, arr [][]bool) {
 		if !collisions[coord.X][coord.Y] && !checked[coord.X][coord.Y] {
-			room := Room{Id: roomsCounter}
+			room := Area{Id: areaCounter}
 			queue := h.Queue[h.Vector]{}
 			queue.Enqueue(coord)
 			for !queue.IsEmpty() {
@@ -22,7 +22,7 @@ func FindRooms(collisions [][]bool) ([]Room, [][]int) {
 					continue
 				}
 				room.NumOfCells++
-				roomsMap[checkCoord.X][checkCoord.Y] = roomsCounter
+				areasMap[checkCoord.X][checkCoord.Y] = areaCounter
 				for _, neighbor := range GetNeighborCoords(*checkCoord) {
 					if !collisions[neighbor.X][neighbor.Y] && !checked[neighbor.X][neighbor.Y] {
 						queue.Enqueue(neighbor)
@@ -30,12 +30,44 @@ func FindRooms(collisions [][]bool) ([]Room, [][]int) {
 				}
 				checked[checkCoord.X][checkCoord.Y] = true
 			}
-			rooms = append(rooms, room)
-			roomsCounter++
+			areas = append(areas, room)
+			areaCounter++
 		}
 
 	}
 
 	ForEach(collisions, f)
-	return rooms, roomsMap
+	return areas, areasMap
+}
+
+func GetDepthMap(collisions [][]bool) ([][]int, int) {
+	collisions = Copy(collisions)
+	size := Size(collisions)
+	depthMap := GenEmpty(size, 0)
+	edges := GetFloorNearCollision(collisions)
+	depthCounter := 1
+	for len(edges) > 0 {
+		for _, coord := range edges {
+			depthMap[coord.X][coord.Y] = depthCounter
+			collisions[coord.X][coord.Y] = true
+		}
+		edges = GetFloorNearCollision(collisions)
+		depthCounter++
+	}
+
+	return depthMap, depthCounter
+}
+
+func GetFloorNearCollision(collisions [][]bool) []h.Vector {
+	coords := []h.Vector{}
+
+	f := func(coord h.Vector, arr [][]bool) {
+		walls, _ := CountCollisionNeighbors(collisions, coord)
+		if !collisions[coord.X][coord.Y] && walls > 0 {
+			coords = append(coords, coord)
+		}
+	}
+
+	ForEach(collisions, f)
+	return coords
 }

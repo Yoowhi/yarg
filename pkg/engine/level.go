@@ -10,8 +10,10 @@ type Level struct {
 	Collisions [][]bool
 	Visuals    [][]Cell
 	Actors     Pool[Actor]
-	Rooms      []gen.Room
+	Rooms      []gen.Area
 	RoomsMap   [][]int
+	DepthMap   [][]int
+	MaxDepth   int
 }
 
 func (lvl *Level) IsCollision(coord h.Vector) bool {
@@ -20,14 +22,17 @@ func (lvl *Level) IsCollision(coord h.Vector) bool {
 
 func GenLevel(size h.Vector) *Level {
 	collisions := genCollisions(size)
-	rooms, roomsMap := gen.FindRooms(collisions)
+	rooms, roomsMap := gen.GetAreas(collisions)
+	depthMap, maxDepth := gen.GetDepthMap(collisions)
 
 	lvl := Level{
 		Collisions: collisions,
-		Visuals:    genCells(collisions),
+		Visuals:    genCells(collisions, depthMap, maxDepth),
 		Actors:     Pool[Actor]{},
 		Rooms:      rooms,
 		RoomsMap:   roomsMap,
+		DepthMap:   depthMap,
+		MaxDepth:   maxDepth,
 	}
 
 	return &lvl
@@ -43,7 +48,7 @@ func genCollisions(size h.Vector) [][]bool {
 	return smoothed
 }
 
-func genCells(collisions [][]bool) [][]Cell {
+func genCells(collisions [][]bool, depthMap [][]int, maxDepth int) [][]Cell {
 	wallStyle := tcell.StyleDefault.Background((tcell.ColorDarkGray)).Foreground(tcell.ColorWhite)
 	floorStyle := tcell.StyleDefault.Background((tcell.ColorBlack)).Foreground(tcell.ColorDarkGray)
 	cells := make([][]Cell, len(collisions))
@@ -54,8 +59,9 @@ func genCells(collisions [][]bool) [][]Cell {
 				subarr[y].Style = wallStyle
 				subarr[y].Symbol = ' '
 			} else {
-				subarr[y].Style = floorStyle
-				subarr[y].Symbol = '.'
+				color := getColor(depthMap[x][y], maxDepth)
+				subarr[y].Style = floorStyle.Background(color)
+				subarr[y].Symbol = ' '
 			}
 
 		}
@@ -63,4 +69,13 @@ func genCells(collisions [][]bool) [][]Cell {
 	}
 
 	return cells
+}
+
+func getColor(depth int, maxDepth int) tcell.Color {
+	depth = maxDepth - depth
+	coeff := float64(depth) / float64(maxDepth)
+	coeff *= coeff * coeff * coeff
+	coeff += 1
+	coeff /= 2
+	return tcell.NewRGBColor(int32(46*coeff), int32(41*coeff), int32(59*coeff))
 }

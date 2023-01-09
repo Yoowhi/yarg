@@ -1,6 +1,6 @@
 package gen
 
-type Room struct {
+type Area struct {
 	Id         int
 	NumOfCells int
 }

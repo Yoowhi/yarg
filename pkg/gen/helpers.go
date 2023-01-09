@@ -38,7 +38,7 @@ func CountFloorNeighbors(lvl [][]bool, coord h.Vector) (int, bool) {
 	return counter, isWall
 }
 
-func CountWallNeighbors(lvl [][]bool, coord h.Vector) (int, bool) {
+func CountCollisionNeighbors(lvl [][]bool, coord h.Vector) (int, bool) {
 	lastX := len(lvl) - 1
 	lastY := len(lvl[0]) - 1
 	neighbors := GetNeighborCoords(coord)
@@ -79,4 +79,14 @@ func Size[T any](plane [][]T) h.Vector {
 		X: len(plane),
 		Y: len(plane[0]),
 	}
+}
+
+func Copy[T any](plane [][]T) [][]T {
+	size := Size(plane)
+	duplicate := make([][]T, size.X)
+	for x := range plane {
+		duplicate[x] = make([]T, size.Y)
+		copy(duplicate[x], plane[x])
+	}
+	return duplicate
 }

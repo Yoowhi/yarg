@@ -22,8 +22,7 @@ func (q *Queue[T]) Dequeue() (*T, error) {
 	return &el, nil
 }
 
-func NewQueue[T any](cap int) Queue[T] {
-	list := make([]T, cap)
+func ConvertToQueue[T any](list []T) Queue[T] {
 	return Queue[T]{list: list}
 }
 
