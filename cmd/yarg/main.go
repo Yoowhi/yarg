@@ -20,7 +20,7 @@ var screen tcell.Screen
 func main() {
 
 	screen = initScreen()
-	width, height := screen.Size()
+	width, height := 300, 300
 
 	currentLvl = engine.GenLevel(h.Vector{X: width, Y: height})
 
@@ -35,7 +35,7 @@ func main() {
 	currentLvl.Actors.Add(&hero)
 
 	for {
-		engine.Draw(screen, currentLvl)
+		engine.Draw(screen, currentLvl, hero.Position)
 		WaitInput()
 		for _, actor := range currentLvl.Actors.List {
 			actor.TakeTurn()

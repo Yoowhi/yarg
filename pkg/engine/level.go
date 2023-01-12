@@ -7,6 +7,7 @@ import (
 )
 
 type Level struct {
+	Size       h.Vector
 	Collisions [][]bool
 	Visuals    [][]Cell
 	Actors     Pool[Actor]
@@ -26,6 +27,7 @@ func GenLevel(size h.Vector) *Level {
 	depthMap, maxDepth := gen.GetDepthMap(collisions)
 
 	lvl := Level{
+		Size:       size,
 		Collisions: collisions,
 		Visuals:    genCells(collisions, depthMap, maxDepth),
 		Actors:     Pool[Actor]{},

@@ -15,3 +15,11 @@ func (v1 Vector) Substract(v2 Vector) Vector {
 func (v1 Vector) Add(v2 Vector) Vector {
 	return Vector{X: v1.X + v2.X, Y: v1.Y + v2.Y}
 }
+
+func (v1 Vector) Multiply(v2 Vector) Vector {
+	return Vector{X: v1.X * v2.X, Y: v1.Y * v2.Y}
+}
+
+func (v1 Vector) Divide(v2 Vector) Vector {
+	return Vector{X: v1.X / v2.X, Y: v1.Y / v2.Y}
+}
