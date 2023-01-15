@@ -4,31 +4,31 @@ import (
 	"github.com/yoowhi/yarg/pkg/h"
 )
 
-func GetAreas(collisions [][]bool) ([]Area, [][]int) {
-	size := Size(collisions)
-	areasMap := GenEmpty(size, -1)
-	checked := GenEmpty(size, false)
+func GetAreas(collisions h.Field[bool]) ([]Area, h.Field[int]) {
+	size := collisions.Size
+	areasMap := h.NewField(size, -1)
+	checked := h.NewField(size, false)
 	areas := []Area{}
 	areaCounter := 0
 
-	f := func(coord h.Vector, arr [][]bool) {
-		if !collisions[coord.X][coord.Y] && !checked[coord.X][coord.Y] {
+	f := func(coord h.Vector, field *h.Field[bool]) {
+		if !collisions.Get(coord) && !checked.Get(coord) {
 			room := Area{Id: areaCounter}
 			queue := h.Queue[h.Vector]{}
 			queue.Enqueue(coord)
 			for !queue.IsEmpty() {
 				checkCoord, _ := queue.Dequeue()
-				if checked[checkCoord.X][checkCoord.Y] {
+				if checked.Get(*checkCoord) {
 					continue
 				}
 				room.NumOfCells++
-				areasMap[checkCoord.X][checkCoord.Y] = areaCounter
+				areasMap.Set(*checkCoord, areaCounter)
 				for _, neighbor := range GetNeighborCoords(*checkCoord) {
-					if !collisions[neighbor.X][neighbor.Y] && !checked[neighbor.X][neighbor.Y] {
+					if !collisions.Get(neighbor) && !checked.Get(neighbor) {
 						queue.Enqueue(neighbor)
 					}
 				}
-				checked[checkCoord.X][checkCoord.Y] = true
+				checked.Set(*checkCoord, true)
 			}
 			areas = append(areas, room)
 			areaCounter++
@@ -36,20 +36,20 @@ func GetAreas(collisions [][]bool) ([]Area, [][]int) {
 
 	}
 
-	ForEach(collisions, f)
+	collisions.ForEach(f)
 	return areas, areasMap
 }
 
-func GetDepthMap(collisions [][]bool) ([][]int, int) {
-	collisions = Copy(collisions)
-	size := Size(collisions)
-	depthMap := GenEmpty(size, 0)
+func GetDepthMap(collisions h.Field[bool]) (h.Field[int], int) {
+	collisions = collisions.Duplicate()
+	size := collisions.Size
+	depthMap := h.NewField(size, 0)
 	edges := GetFloorNearCollision(collisions)
 	depthCounter := 1
 	for len(edges) > 0 {
 		for _, coord := range edges {
-			depthMap[coord.X][coord.Y] = depthCounter
-			collisions[coord.X][coord.Y] = true
+			depthMap.Set(coord, depthCounter)
+			collisions.Set(coord, true)
 		}
 		edges = GetFloorNearCollision(collisions)
 		depthCounter++
@@ -58,16 +58,16 @@ func GetDepthMap(collisions [][]bool) ([][]int, int) {
 	return depthMap, depthCounter
 }
 
-func GetFloorNearCollision(collisions [][]bool) []h.Vector {
+func GetFloorNearCollision(collisions h.Field[bool]) []h.Vector {
 	coords := []h.Vector{}
 
-	f := func(coord h.Vector, arr [][]bool) {
+	f := func(coord h.Vector, field *h.Field[bool]) {
 		walls, _ := CountCollisionNeighbors(collisions, coord)
-		if !collisions[coord.X][coord.Y] && walls > 0 {
+		if !collisions.Get(coord) && walls > 0 {
 			coords = append(coords, coord)
 		}
 	}
 
-	ForEach(collisions, f)
+	collisions.ForEach(f)
 	return coords
 }

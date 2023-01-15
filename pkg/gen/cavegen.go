@@ -6,51 +6,58 @@ import (
 	"github.com/yoowhi/yarg/pkg/h"
 )
 
-func GenRandom(size h.Vector, percentFill int) [][]bool {
-	arr := GenEmpty(size, true)
-
-	f := func(coord h.Vector, arr [][]bool) {
-		if rand.Intn(101) <= percentFill {
-			arr[coord.X][coord.Y] = false
-		} else {
-			arr[coord.X][coord.Y] = true
-		}
+func GenCollisions(size h.Vector) h.Field[bool] {
+	rand := GenRandom(size, 43)
+	smoothed := Smooth(rand, 4)
+	for i := 0; i < 4; i++ {
+		smoothed = Smooth(smoothed, 4)
 	}
-
-	ForEach(arr, f)
-	return arr
-}
-
-func Smooth(collisions [][]bool, minNeighbors int) [][]bool {
-	smoothed := GenEmpty(Size(collisions), true)
-
-	f := func(coord h.Vector, arr [][]bool) {
-		neighbors, isEdge := CountFloorNeighbors(collisions, coord)
-		if isEdge {
-			smoothed[coord.X][coord.Y] = true
-		} else if neighbors >= minNeighbors {
-			smoothed[coord.X][coord.Y] = false
-		} else {
-			smoothed[coord.X][coord.Y] = true
-		}
-	}
-
-	ForEach(collisions, f)
+	smoothed = SmoothRoughness(smoothed)
 	return smoothed
 }
 
-func SmoothRoughness(collisions [][]bool) [][]bool {
-	maxFloor := 5
+func GenRandom(size h.Vector, percentFill int) h.Field[bool] {
+	arr := h.NewField(size, true)
 
-	f := func(coord h.Vector, arr [][]bool) {
-		neighbors, isEdge := CountFloorNeighbors(collisions, coord)
-		if isEdge {
-			collisions[coord.X][coord.Y] = true
-		} else if neighbors >= maxFloor {
-			collisions[coord.X][coord.Y] = false
+	f := func(coord h.Vector, field *h.Field[bool]) {
+		if rand.Intn(101) <= percentFill {
+			field.Set(coord, false)
+		} else {
+			field.Set(coord, true)
 		}
 	}
 
-	ForEach(collisions, f)
-	return collisions
+	return arr.ForEach(f)
+}
+
+func Smooth(collisions h.Field[bool], minNeighbors int) h.Field[bool] {
+	smoothed := h.NewField(collisions.Size, true)
+
+	f := func(coord h.Vector, field *h.Field[bool]) {
+		neighbors, isEdge := CountFloorNeighbors(collisions, coord)
+		if isEdge {
+			field.Set(coord, true)
+		} else if neighbors >= minNeighbors {
+			field.Set(coord, false)
+		} else {
+			field.Set(coord, true)
+		}
+	}
+
+	return smoothed.ForEach(f)
+}
+
+func SmoothRoughness(collisions h.Field[bool]) h.Field[bool] {
+	maxFloor := 5
+
+	f := func(coord h.Vector, field *h.Field[bool]) {
+		neighbors, isEdge := CountFloorNeighbors(collisions, coord)
+		if isEdge {
+			field.Set(coord, true)
+		} else if neighbors >= maxFloor {
+			field.Set(coord, false)
+		}
+	}
+
+	return collisions.ForEach(f)
 }

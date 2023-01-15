@@ -8,21 +8,21 @@ import (
 
 type Level struct {
 	Size       h.Vector
-	Collisions [][]bool
-	Visuals    [][]Cell
+	Collisions h.Field[bool]
+	Visuals    h.Field[Cell]
 	Actors     Pool[Actor]
 	Rooms      []gen.Area
-	RoomsMap   [][]int
-	DepthMap   [][]int
+	RoomsMap   h.Field[int]
+	DepthMap   h.Field[int]
 	MaxDepth   int
 }
 
 func (lvl *Level) IsCollision(coord h.Vector) bool {
-	return lvl.Collisions[coord.X][coord.Y]
+	return lvl.Collisions.Get(coord)
 }
 
 func GenLevel(size h.Vector) *Level {
-	collisions := genCollisions(size)
+	collisions := gen.GenCollisions(size)
 	rooms, roomsMap := gen.GetAreas(collisions)
 	depthMap, maxDepth := gen.GetDepthMap(collisions)
 
@@ -40,37 +40,27 @@ func GenLevel(size h.Vector) *Level {
 	return &lvl
 }
 
-func genCollisions(size h.Vector) [][]bool {
-	rand := gen.GenRandom(size, 43)
-	smoothed := gen.Smooth(rand, 4)
-	for i := 0; i < 4; i++ {
-		smoothed = gen.Smooth(smoothed, 4)
-	}
-	smoothed = gen.SmoothRoughness(smoothed)
-	return smoothed
-}
-
-func genCells(collisions [][]bool, depthMap [][]int, maxDepth int) [][]Cell {
+func genCells(collisions h.Field[bool], depthMap h.Field[int], maxDepth int) h.Field[Cell] {
 	wallStyle := tcell.StyleDefault.Background((tcell.ColorDarkGray)).Foreground(tcell.ColorWhite)
 	floorStyle := tcell.StyleDefault.Background((tcell.ColorBlack)).Foreground(tcell.ColorDarkGray)
-	cells := make([][]Cell, len(collisions))
-	for x := 0; x < len(collisions); x++ {
-		subarr := make([]Cell, len(collisions[x]))
-		for y := 0; y < len(collisions[x]); y++ {
-			if collisions[x][y] {
-				subarr[y].Style = wallStyle
-				subarr[y].Symbol = ' '
-			} else {
-				color := getColor(depthMap[x][y], maxDepth)
-				subarr[y].Style = floorStyle.Background(color)
-				subarr[y].Symbol = ' '
-			}
+	cells := h.EmptyField[Cell](collisions.Size)
 
+	f := func(coord h.Vector, field *h.Field[Cell]) {
+		if collisions.Get(coord) {
+			field.Set(coord, Cell{
+				Style:  wallStyle,
+				Symbol: ' ',
+			})
+		} else {
+			color := getColor(depthMap.Get(coord), maxDepth)
+			field.Set(coord, Cell{
+				Style:  floorStyle.Background(color),
+				Symbol: ' ',
+			})
 		}
-		cells[x] = subarr
 	}
 
-	return cells
+	return cells.ForEach(f)
 }
 
 func getColor(depth int, maxDepth int) tcell.Color {

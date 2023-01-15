@@ -2,52 +2,32 @@ package gen
 
 import "github.com/yoowhi/yarg/pkg/h"
 
-func ForEach[T any](field [][]T, f func(coord h.Vector, field [][]T)) {
-	for x, col := range field {
-		for y := range col {
-			f(h.Vector{X: x, Y: y}, field)
-		}
-	}
-}
-
-func GenEmpty[T any](size h.Vector, initVal T) [][]T {
-	arr := make([][]T, size.X)
-	for x := 0; x < size.X; x++ {
-		subarr := make([]T, size.Y)
-		for y := 0; y < size.Y; y++ {
-			subarr[y] = initVal
-		}
-		arr[x] = subarr
-	}
-	return arr
-}
-
-func CountFloorNeighbors(lvl [][]bool, coord h.Vector) (int, bool) {
-	lastX := len(lvl) - 1
-	lastY := len(lvl[0]) - 1
+func CountFloorNeighbors(field h.Field[bool], coord h.Vector) (int, bool) {
+	lastX := field.Size.X - 1
+	lastY := field.Size.Y - 1
 	neighbors := GetNeighborCoords(coord)
 	isWall := false
 	counter := 0
 	for _, neighbor := range neighbors {
 		if neighbor.X < 0 || neighbor.X > lastX || neighbor.Y < 0 || neighbor.Y > lastY {
 			isWall = true
-		} else if !lvl[neighbor.X][neighbor.Y] {
+		} else if !field.Get(neighbor) {
 			counter += 1
 		}
 	}
 	return counter, isWall
 }
 
-func CountCollisionNeighbors(lvl [][]bool, coord h.Vector) (int, bool) {
-	lastX := len(lvl) - 1
-	lastY := len(lvl[0]) - 1
+func CountCollisionNeighbors(field h.Field[bool], coord h.Vector) (int, bool) {
+	lastX := field.Size.X - 1
+	lastY := field.Size.Y - 1
 	neighbors := GetNeighborCoords(coord)
 	isWall := false
 	counter := 0
 	for _, neighbor := range neighbors {
 		if neighbor.X < 0 || neighbor.X > lastX || neighbor.Y < 0 || neighbor.Y > lastY {
 			isWall = true
-		} else if lvl[neighbor.X][neighbor.Y] {
+		} else if field.Get(neighbor) {
 			counter += 1
 		}
 	}
@@ -72,21 +52,4 @@ func GetNeighborCoords(coord h.Vector) [8]h.Vector {
 		}
 	}
 	return arr
-}
-
-func Size[T any](plane [][]T) h.Vector {
-	return h.Vector{
-		X: len(plane),
-		Y: len(plane[0]),
-	}
-}
-
-func Copy[T any](plane [][]T) [][]T {
-	size := Size(plane)
-	duplicate := make([][]T, size.X)
-	for x := range plane {
-		duplicate[x] = make([]T, size.Y)
-		copy(duplicate[x], plane[x])
-	}
-	return duplicate
 }

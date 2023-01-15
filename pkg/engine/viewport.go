@@ -18,10 +18,10 @@ func Draw(screen tcell.Screen, lvl *Level, viewPoint h.Vector) {
 			mapCoord := h.Vector{X: x, Y: y}
 			rp := mapCoord.Substract(drawFrom)
 			if insideMap {
-				rn := lvl.Visuals[x][y].Symbol
-				screen.SetContent(rp.X, rp.Y, rn, nil, lvl.Visuals[x][y].Style)
+				rn := lvl.Visuals.Get(mapCoord).Symbol
+				screen.SetContent(rp.X, rp.Y, rn, nil, lvl.Visuals.Get(mapCoord).Style)
 			} else {
-				screen.SetContent(rp.X, rp.Y, ' ', nil, lvl.Visuals[0][0].Style)
+				screen.SetContent(rp.X, rp.Y, ' ', nil, lvl.Visuals.Get(h.Vector{}).Style)
 			}
 		}
 	}
@@ -30,7 +30,7 @@ func Draw(screen tcell.Screen, lvl *Level, viewPoint h.Vector) {
 		if inBounds(pos, drawFrom, drawTo) {
 			rp := pos.Substract(drawFrom)
 			cell := actor.GetCell()
-			screen.SetContent(rp.X, rp.Y, cell.Symbol, nil, cell.Style.Background(tcell.Color(lvl.Visuals[pos.X][pos.Y].Style)))
+			screen.SetContent(rp.X, rp.Y, cell.Symbol, nil, cell.Style.Background(tcell.Color(lvl.Visuals.Get(pos).Style)))
 		}
 	}
 	screen.Show()
